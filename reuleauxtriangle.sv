@@ -1,4 +1,4 @@
-module task2(input logic CLOCK_50, input logic [3:0] KEY,
+module reuleauxtriangle(input logic CLOCK_50, input logic [3:0] KEY,
              input logic [9:0] SW, output logic [9:0] LEDR,
              output logic [6:0] HEX0, output logic [6:0] HEX1, output logic [6:0] HEX2,
              output logic [6:0] HEX3, output logic [6:0] HEX4, output logic [6:0] HEX5,
@@ -15,6 +15,11 @@ logic [6:0] vga_y;
 logic vga_plot;
 logic done;
 logic start;
+logic [7:0] centre_x;
+logic [6:0] centre_y;
+logic [7:0] diameter;
+
+assign diameter = {SW[9:3], 1'b0};
 
 always_ff @(posedge CLOCK_50)begin
     if(!rst_n)begin
@@ -22,22 +27,27 @@ always_ff @(posedge CLOCK_50)begin
     end
     else begin
         start <= 1'b1;
+        centre_x <= 8'd80;
+        centre_y <= 7'd60;
     end
 end
 
- fillscreen fill_inst(
-        .clk(CLOCK_50),
-        .rst_n(rst_n),
+
+reuleaux cir(
+        .clk(CLOCK_50), 
+        .rst_n(rst_n), 
         .colour(SW[2:0]),
+        .centre_x(centre_x),
+        .centre_y(centre_y), 
+        .diameter(diameter),
         .start(start),
         .done(done),
         .vga_x(VGA_X),
         .vga_y(VGA_Y),
         .vga_colour(VGA_COLOUR),
-        .vga_plot(VGA_PLOT)
-    );
+        .vga_plot(VGA_PLOT));
 
- vga_adapter VGA(
+ vga_adapter#(.RESOLUTION("160x120")) vga_u0(
         .resetn(rst_n),
         .clock(CLOCK_50),
         .colour(VGA_COLOUR),
@@ -50,7 +60,6 @@ end
         .VGA_HS(VGA_HS),
         .VGA_VS(VGA_VS),
         .VGA_CLK(VGA_CLK)
-    );
+        );
 
- 
-endmodule: task2
+endmodule: task4
